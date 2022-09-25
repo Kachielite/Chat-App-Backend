@@ -20,6 +20,6 @@ const userModel = new Schema({
       ref: "messages",
     },
   ],
-});
+},{timestamps: true});
 
-module.exports = mongoose.model('User', userModel);
+module.exports = mongoose.model('user', userModel);
