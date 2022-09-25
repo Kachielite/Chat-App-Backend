@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require('mongoose');
 
 const app = express();
 
@@ -15,6 +16,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen("3000", () => {
-  console.log("App is listening on port 3000");
-});
+
+mongoose.connect('mongodb+srv://kachi:Madumere281091@blog.lqn85x7.mongodb.net/socialMedia?retryWrites=true&w=majority').then(result =>{
+    console.log('Connection to DB successful ...')
+    app.listen("3000", () => {
+      console.log("App is listening on port 3000");
+    });
+}).catch(error =>{
+    console.log(error)
+})
+
