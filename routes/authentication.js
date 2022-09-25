@@ -16,7 +16,6 @@ routes.post(
       .withMessage("username is required")
       .custom((value, { req }) => {
         return User.findOne({ username: value }).then((userDoc) => {
-            console.log(value)
           if (userDoc) {
             return Promise.reject("Username is already taken.");
           }
@@ -36,6 +35,15 @@ routes.post(
     }),
   ],
   authController.register
+);
+
+routes.post(
+  "/sign_in",
+  [
+    body("username").not().isEmpty().withMessage("username is required"),
+    body("password").not().isEmpty().withMessage("password is required"),
+  ],
+  authController.signIn
 );
 
 module.exports = routes;
