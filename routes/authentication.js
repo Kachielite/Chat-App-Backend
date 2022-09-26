@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 const User = require("../models/user");
 const authController = require("../controllers/authentication");
+const isAuth = require('../middleware/jwt');
 
 const routes = express.Router();
 
@@ -38,12 +39,14 @@ routes.post(
 );
 
 routes.post(
-  "/sign_in",
+  "/sign-in",
   [
     body("username").not().isEmpty().withMessage("username is required"),
     body("password").not().isEmpty().withMessage("password is required"),
   ],
   authController.signIn
 );
+
+
 
 module.exports = routes;

@@ -14,6 +14,12 @@ const userModel = new Schema({
     type: String,
     required: true,
   },
+  display_picture_url:{
+    type: String,
+  },
+  display_picture_public_id:{
+    type: String,
+  },
   messages: [
     {
       type: Schema.Types.ObjectId,

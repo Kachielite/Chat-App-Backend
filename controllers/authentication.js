@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
+
 exports.register = async (req, res, next) => {
   const name = req.body.name;
   const username = req.body.username;
@@ -16,19 +17,16 @@ exports.register = async (req, res, next) => {
       error.data = errors.array();
       throw error;
     }
-
     const harshPassword = await bcyrpt.hash(password, 12);
     const user = new User();
     user.name = name;
     user.username = username;
     user.password = harshPassword;
     const newUser = await user.save();
-    return res
-      .status(201)
-      .json({
-        message: "User successfully created",
-        userId: newUser._id.toString(),
-      });
+    return res.status(201).json({
+      message: "User successfully created",
+      userId: newUser._id.toString(),
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -40,6 +38,7 @@ exports.register = async (req, res, next) => {
 exports.signIn = async (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
+ 
 
   try {
     const errors = validationResult(req);
@@ -66,13 +65,11 @@ exports.signIn = async (req, res, next) => {
       "chatappsupersecretpasswordtoken",
       { expiresIn: "1h" }
     );
-    return res
-      .status(200)
-      .json({
-        message: "User successfully signed in.",
-        user: user._id.toString(),
-        token: token,
-      });
+    return res.status(200).json({
+      message: "User successfully signed in.",
+      user: user._id.toString(),
+      token: token,
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -80,3 +77,5 @@ exports.signIn = async (req, res, next) => {
     next(error);
   }
 };
+
+
