@@ -1,6 +1,6 @@
 const bcyrpt = require("bcryptjs");
 const { validationResult } = require("express-validator");
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 exports.register = async (req, res, next) => {
@@ -25,7 +25,10 @@ exports.register = async (req, res, next) => {
     const newUser = await user.save();
     return res
       .status(201)
-      .json({ message: "User successfully created", userId: newUser._id.toString() });
+      .json({
+        message: "User successfully created",
+        userId: newUser._id.toString(),
+      });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -57,9 +60,19 @@ exports.signIn = async (req, res, next) => {
       const error = new Error("Authentication failed. Wrong password");
       error.statusCode = 401;
       throw error;
-    } 
-    const token = jwt.sign({userId: user._id.toString()}, 'chatappsupersecretpasswordtoken', {expiresIn:"1h"})
-    return res.status(200).json({ message: "User successfully signed in.", user: user._id.toString(), token: token });
+    }
+    const token = jwt.sign(
+      { userId: user._id.toString() },
+      "chatappsupersecretpasswordtoken",
+      { expiresIn: "1h" }
+    );
+    return res
+      .status(200)
+      .json({
+        message: "User successfully signed in.",
+        user: user._id.toString(),
+        token: token,
+      });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
