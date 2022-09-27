@@ -1,19 +1,15 @@
 const express = require("express");
-const { createServer } = require("http");
-const { Server } = require("socket.io");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/authentication");
 const chatsRoutes = require("./routes/chats");
-const userRoutes = require('./routes/user')
-const multer = require('multer');
-const fileStorage = require('./utils/fileStorage');
-const fileFiltering = require('./utils/fileFiltering');
+const userRoutes = require("./routes/user");
+const multer = require("multer");
+const fileStorage = require("./utils/fileStorage");
+const fileFiltering = require("./utils/fileFiltering");
 
 const app = express();
-const httpServer = createServer(app);
-
 dotenv.config();
 //Middleware
 app.use(bodyParser.json());
@@ -26,7 +22,11 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
-app.use(multer({storage: fileStorage, fileFilter: fileFiltering}).single('display_picture'))
+app.use(
+  multer({ storage: fileStorage, fileFilter: fileFiltering }).single(
+    "display_picture"
+  )
+);
 
 //routes
 app.use("/api/v1", authRoutes);
@@ -35,7 +35,7 @@ app.use("/api/v1", userRoutes);
 
 //Error Handling Middleware
 app.use((error, req, res, next) => {
-  console.log(error)
+  console.log(error);
   let message = error.message;
   let status = error.statusCode;
   let data = error.data;
@@ -48,14 +48,11 @@ mongoose
   )
   .then((result) => {
     console.log("Connection to DB successful ...");
-    const io = new Server(httpServer, { });
-    io.on("connection", (socket) => {
-      console.log('Client Connected')
+    const server = app.listen(8080);
+    const io = require("./utils/socketIO").init(server);
+    io.emit("connection", (socket) => {
+      console.log("Client Connected");
     });
-    httpServer.listen(8080, ()=>{
-      console.log('Server running on port 3000')
-    });
-
   })
   .catch((error) => {
     console.log(error);

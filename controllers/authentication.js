@@ -2,7 +2,7 @@ const bcyrpt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-
+const io = require("../utils/socketIO");
 
 exports.register = async (req, res, next) => {
   const name = req.body.name;
@@ -38,7 +38,6 @@ exports.register = async (req, res, next) => {
 exports.signIn = async (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
- 
 
   try {
     const errors = validationResult(req);
@@ -65,6 +64,7 @@ exports.signIn = async (req, res, next) => {
       "chatappsupersecretpasswordtoken",
       { expiresIn: "1h" }
     );
+    io.getIO().emit('signedIn', {message:`${user.username} is online`})
     return res.status(200).json({
       message: "User successfully signed in.",
       user: user._id.toString(),
