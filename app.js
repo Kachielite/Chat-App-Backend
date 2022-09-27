@@ -1,4 +1,6 @@
 const express = require("express");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
@@ -10,6 +12,8 @@ const fileStorage = require('./utils/fileStorage');
 const fileFiltering = require('./utils/fileFiltering');
 
 const app = express();
+const httpServer = createServer(app);
+
 dotenv.config();
 //Middleware
 app.use(bodyParser.json());
@@ -44,9 +48,14 @@ mongoose
   )
   .then((result) => {
     console.log("Connection to DB successful ...");
-    app.listen("3000", () => {
-      console.log("App is listening on port 3000");
+    const io = new Server(httpServer, { });
+    io.on("connection", (socket) => {
+      console.log('Client Connected')
     });
+    httpServer.listen(3000, ()=>{
+      console.log('Server running on port 3000')
+    });
+
   })
   .catch((error) => {
     console.log(error);
