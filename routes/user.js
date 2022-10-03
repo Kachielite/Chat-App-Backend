@@ -26,4 +26,6 @@ routes.put(
   userController.updateUserData
 );
 
+routes.get('/users', isAuth, userController.getAllUsers)
+
 module.exports = routes;

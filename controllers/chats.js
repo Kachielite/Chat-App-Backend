@@ -18,6 +18,7 @@ exports.getAllChats = async (req, res, next) => {
 exports.postChat = async (req, res, next) => {
   const chat = req.body.message;
   const user = req.userId;
+  const io = req.app.get("socketio");
 
   try {
     const errors = validationResult(req);
@@ -32,6 +33,7 @@ exports.postChat = async (req, res, next) => {
     chats.message = chat;
     chats.user = user;
     await chats.save();
+    io.emit('new chat', {chat: chats.message})
     res.status(201).json({message:"Chat successfully saved"})
   } catch (error) {
     if (!error.statusCode) {

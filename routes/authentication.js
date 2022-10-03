@@ -27,13 +27,7 @@ routes.post(
       .isEmpty()
       .withMessage("password is required")
       .isLength({ min: 5 })
-      .withMessage("Password must have a minimum of 5 characters"),
-    body("confirmPassword").custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Passwords do not match, please check and try again");
-      }
-      return true;
-    }),
+      .withMessage("Password must have a minimum of 5 characters")
   ],
   authController.register
 );

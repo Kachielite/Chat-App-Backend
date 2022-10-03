@@ -1,5 +1,8 @@
 const express = require("express");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/authentication");
@@ -10,18 +13,22 @@ const fileStorage = require("./utils/fileStorage");
 const fileFiltering = require("./utils/fileFiltering");
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {});
 dotenv.config();
 //Middleware
-app.use(bodyParser.json());
+
+app.use(cors());
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
     "OPTIONS, GET, POST, PUT, PATCH, DELETE"
   );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Origin");
   next();
 });
+app.use(bodyParser.json());
 app.use(
   multer({ storage: fileStorage, fileFilter: fileFiltering }).single(
     "display_picture"
@@ -48,12 +55,20 @@ mongoose
   )
   .then((result) => {
     console.log("Connection to DB successful ...");
-    const server = app.listen(8080);
-    const io = require("./utils/socketIO").init(server);
-    io.emit("connection", (socket) => {
-      console.log("Client Connected");
+    httpServer.listen(8080, () => {
+      console.log("Server listening on port 8080");
+    });
+    io.on("connection", (socket) => {
+      console.log(`Client with id ${socket.id} Connected`);
+      socket.join("chat room");
     });
   })
   .catch((error) => {
     console.log(error);
   });
+
+app.set("socketio", io); //here you export my socket.io to a global
+
+io.on("signedOut", (data) => {
+  io.to("chat room").emit("user gone");
+});
