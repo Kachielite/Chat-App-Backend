@@ -14,7 +14,7 @@ const fileFiltering = require("./utils/fileFiltering");
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, {});
+const io = new Server(httpServer, { cors: { origin: '*' } });
 dotenv.config();
 //Middleware
 

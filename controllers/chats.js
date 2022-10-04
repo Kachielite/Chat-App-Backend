@@ -1,9 +1,10 @@
 const Message = require("../models/messages");
+const User = require("../models/user");
 const { validationResult } = require("express-validator");
 
 exports.getAllChats = async (req, res, next) => {
   try {
-    const chats = await Message.find();
+    const chats = await Message.find().populate("user");
     res
       .status(200)
       .json({ message: "Chats successfully fetched", chats: chats });
@@ -17,7 +18,7 @@ exports.getAllChats = async (req, res, next) => {
 
 exports.postChat = async (req, res, next) => {
   const chat = req.body.message;
-  const user = req.userId;
+  const userId = req.userId;
   const io = req.app.get("socketio");
 
   try {
@@ -28,17 +29,17 @@ exports.postChat = async (req, res, next) => {
       error.data = errors.array();
       throw error;
     }
-
+    const userDetails = await User.findById(userId)
     const chats = new Message();
     chats.message = chat;
-    chats.user = user;
+    chats.user = userId;
     await chats.save();
-    io.emit('new chat', {chat: chats.message})
-    res.status(201).json({message:"Chat successfully saved"})
+  io.emit("new chat", { message: chats.message , user: {_id: userId, username: userDetails.username}});
+    res.status(201).json({ message: "Chat successfully saved" });
   } catch (error) {
     if (!error.statusCode) {
-        error.statusCode = 500;
-      }
-      next(error);
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };

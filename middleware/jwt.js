@@ -1,16 +1,17 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = async (req, res, next) => {
-  const authToken = req.get("Authorization");
-
+  const authToken = req.get("authorization");
   try {
     if (!authToken) {
+      console.log(authToken)
       const error = new Error("User not authenticated.");
       error.statusCode = 401;
       throw error;
     }
 
     const token = authToken.split(" ")[1];
+    
 
     const decodedToken = jwt.verify(
       token,
