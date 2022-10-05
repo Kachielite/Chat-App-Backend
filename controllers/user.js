@@ -84,13 +84,16 @@ exports.getAllUsers = async (req, res, next) => {
   }
 };
 
-// exports.updateUserDetails = async (req, res, next) =>{
-//   const userId = req.userId
+exports.updateUserDetails = async (req, res, next) =>{
+  const userId = req.params.userId
   
-//   try {
-//     const user = await User.findById(userId)
-//     res.status(200).json({message:"User details successfully fetched", name: user.name})
-//   } catch (error) {
-    
-//   }
-// }
+  try {
+    const user = await User.findById(userId)
+    res.status(200).json({message:"User details successfully fetched", name: user.name})
+  } catch (error) {
+    if(!error.statusCode){
+      error.statusCode = 500
+    }
+    next(error)
+  }
+}
