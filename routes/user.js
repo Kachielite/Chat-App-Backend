@@ -5,29 +5,10 @@ const isAuth = require("../middleware/jwt");
 
 const routes = express.Router();
 
-routes.put(
-  "/update-user-data",
-  isAuth,
-  [
-    body("name").not().isEmpty().withMessage("name is required"),
-    body("password")
-      .not()
-      .isEmpty()
-      .withMessage("password is required")
-      .isLength({ min: 5 })
-      .withMessage("Password must have a minimum of 5 characters"),
-    body("confirmPassword").custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Passwords do not match, please check and try again");
-      }
-      return true;
-    }),
-  ],
-  userController.updateUserData
-);
+routes.put("/update-user-data", isAuth, userController.updateUserData);
 
-routes.get('/users', isAuth, userController.getAllUsers)
+routes.get("/users", isAuth, userController.getAllUsers);
 
-routes.get('/user/:userId', isAuth, userController.updateUserDetails)
+routes.get("/user/:userId", isAuth, userController.updateUserDetails);
 
 module.exports = routes;

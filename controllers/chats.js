@@ -16,6 +16,9 @@ exports.getAllChats = async (req, res, next) => {
   }
 };
 
+
+
+
 exports.postChat = async (req, res, next) => {
   const chat = req.body.message;
   const userId = req.userId;
@@ -34,7 +37,7 @@ exports.postChat = async (req, res, next) => {
     chats.message = chat;
     chats.user = userId;
     await chats.save();
-  io.emit("new chat", { message: chats.message , user: {_id: userId, username: userDetails.username}});
+  io.emit("new chat", {_id: chats._id, message: chat, user: {_id: userId, username: userDetails.name}});
     res.status(201).json({ message: "Chat successfully saved" });
   } catch (error) {
     if (!error.statusCode) {

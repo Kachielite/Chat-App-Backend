@@ -14,8 +14,10 @@ cloudinary.config({
 });
 
 exports.updateUserData = async (req, res, next) => {
+  console.log(req.file)
   let name = req.body.name;
   let password = req.body.password;
+  let confirmPassword = req.body.confirmPassword
   let display_picture = req.file === undefined ? null : req.file.path;
 
   try {
@@ -46,8 +48,11 @@ exports.updateUserData = async (req, res, next) => {
         user.display_picture_public_id = imageStorage.public_id;
         deleteFiles(display_picture);
       }
+      if(password.length > 0 && password === confirmPassword){
+        user.password = await bcyrpt.hash(password, 12);
+      }
       user.name = name;
-      user.password = await bcyrpt.hash(password, 12);
+      
       await user.save();
       return res
         .status(200)
@@ -89,7 +94,7 @@ exports.updateUserDetails = async (req, res, next) =>{
   
   try {
     const user = await User.findById(userId)
-    res.status(200).json({message:"User details successfully fetched", name: user.name})
+    res.status(200).json({message:"User details successfully fetched", user: user})
   } catch (error) {
     if(!error.statusCode){
       error.statusCode = 500

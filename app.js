@@ -11,21 +11,27 @@ const userRoutes = require("./routes/user");
 const multer = require("multer");
 const fileStorage = require("./utils/fileStorage");
 const fileFiltering = require("./utils/fileFiltering");
+const User = require("./models/user");
+const { isContext } = require("vm");
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: '*' } });
+const io = new Server(httpServer, { cors: { origin: "*" } });
+let userId;
 dotenv.config();
 //Middleware
-
 app.use(cors());
 app.use((req, res, next) => {
+  userId = req.userId;
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
     "OPTIONS, GET, POST, PUT, PATCH, DELETE"
   );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Origin");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Origin"
+  );
   next();
 });
 app.use(bodyParser.json());
@@ -58,9 +64,22 @@ mongoose
     httpServer.listen(8080, () => {
       console.log("Server listening on port 8080");
     });
+    let username;
     io.on("connection", (socket) => {
-      console.log(`Client with id ${socket.id} Connected`);
-      socket.join("chat room");
+      socket.on("join", (data) => {
+        const username = data;
+        socket.broadcast.to("chatroom").emit("message", username);
+        socket.join("chatroom");
+      });
+      socket.on("left", (data) => {
+        let username;
+        console.log(data);
+        username = data;
+        socket.broadcast.to("chatroom").emit("leftChatroom", username);
+        socket.leave("chatroom");
+      });
+
+
     });
   })
   .catch((error) => {
