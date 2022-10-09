@@ -73,13 +73,13 @@ exports.updateUserData = async (req, res, next) => {
 
 exports.getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find();
+    const users = await User.find({}, {"username": 1, "display_picture_url": 1});
     if (!users) {
       return res.status(404).json({ message: "No users found" });
     } else {
       return res
         .status(200)
-        .json({ message: "Users successfully fetched", users: users });
+        .json({ users: users });
     }
   } catch (error) {
     if (!error.statusCode) {

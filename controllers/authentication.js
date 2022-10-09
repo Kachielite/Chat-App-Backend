@@ -60,17 +60,19 @@ exports.signIn = async (req, res, next) => {
       error.statusCode = 401;
       throw error;
     }
-    const token = jwt.sign(
-      { userId: user._id.toString() },
-      "chatappsupersecretpasswordtoken",
-      { expiresIn: "1h" }
-    );
+    let userDetails = {
+      userId: user._id.toString(),
+      username: user.username,
+      profile_photo: !user.display_picture_url ? "" : user.display_picture_url,
+    };
+    const token = jwt.sign(userDetails, "chatappsupersecretpasswordtoken", {
+      expiresIn: "1h",
+    });
     req.username = user.username;
-    io.emit("signedIn", {userId: req.userId});
 
     return res.status(200).json({
       message: "User successfully signed in.",
-      user: user._id.toString(),
+      user: userDetails,
       token: token,
     });
   } catch (error) {
@@ -80,5 +82,3 @@ exports.signIn = async (req, res, next) => {
     next(error);
   }
 };
-
-

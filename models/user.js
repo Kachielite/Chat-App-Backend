@@ -20,6 +20,9 @@ const userModel = new Schema({
   display_picture_public_id:{
     type: String,
   },
+  status:{
+    type: String
+  },
   messages: [
     {
       type: Schema.Types.ObjectId,

@@ -64,22 +64,22 @@ mongoose
     httpServer.listen(8080, () => {
       console.log("Server listening on port 8080");
     });
-    let username;
     io.on("connection", (socket) => {
-      socket.on("join", (data) => {
-        const username = data;
-        socket.broadcast.to("chatroom").emit("message", username);
+      //Notify all users that a new user has joined
+      socket.on("join", (user) => {
+        socket.broadcast.to("chatroom").emit("message", user);
         socket.join("chatroom");
       });
-      socket.on("left", (data) => {
-        let username;
-        console.log(data);
-        username = data;
-        socket.broadcast.to("chatroom").emit("leftChatroom", username);
+
+      //Notify all users that a new user has joined
+      socket.on("left", user => {
+        socket.broadcast.to("chatroom").emit("leftChatroom", user);
         socket.leave("chatroom");
       });
 
-
+      socket.on("typing", user => {
+        socket.broadcast.to("chatroom").emit("is-typing", user.username);
+      });
     });
   })
   .catch((error) => {
@@ -87,7 +87,3 @@ mongoose
   });
 
 app.set("socketio", io); //here you export my socket.io to a global
-
-io.on("signedOut", (data) => {
-  io.to("chat room").emit("user gone");
-});
