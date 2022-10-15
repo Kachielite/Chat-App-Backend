@@ -46,7 +46,6 @@ exports.updateUserData = async (req, res, next) => {
         user.display_picture_url = imageStorage.secure_url;
         user.display_picture_public_id = imageStorage.public_id;
       }
-      console.log(imageStorage);
       if (password && password === confirmPassword) {
         user.password = await bcyrpt.hash(password, 12);
       }
