@@ -14,11 +14,11 @@ cloudinary.config({
 });
 
 exports.updateUserData = async (req, res, next) => {
-  console.log(req.file)
   let name = req.body.name;
   let password = req.body.password;
-  let confirmPassword = req.body.confirmPassword
-  let display_picture = req.file === undefined ? null : req.file.path;
+  let confirmPassword = req.body.confirmPassword;
+  let display_picture =
+    req.body.profile_photo === undefined ? null : req.body.profile_photo;
 
   try {
     const errors = validationResult(req);
@@ -32,31 +32,39 @@ exports.updateUserData = async (req, res, next) => {
     const user = await User.findById(req.userId);
 
     try {
-      if (display_picture && user.display_picture_url !== undefined) {
+      if (display_picture && user.display_picture_url) {
         await cloudinary.uploader.destroy(user.display_picture_public_id);
         imageStorage = await cloudinary.uploader.upload(display_picture, {
           folder: "chats",
         });
         user.display_picture_url = imageStorage.secure_url;
         user.display_picture_public_id = imageStorage.public_id;
-        deleteFiles(display_picture);
-      } else if (display_picture && user.display_picture_url === undefined) {
+      } else if (display_picture && !user.display_picture_url) {
         imageStorage = await cloudinary.uploader.upload(display_picture, {
           folder: "chats",
         });
         user.display_picture_url = imageStorage.secure_url;
         user.display_picture_public_id = imageStorage.public_id;
-        deleteFiles(display_picture);
       }
-      if(password.length > 0 && password === confirmPassword){
+      console.log(imageStorage);
+      if (password && password === confirmPassword) {
         user.password = await bcyrpt.hash(password, 12);
       }
-      user.name = name;
-      
-      await user.save();
-      return res
-        .status(200)
-        .json({ message: "User data successfully updated" });
+      if (name) {
+        user.name = name;
+      }
+
+      try {
+        await user.save();
+        return res
+          .status(200)
+          .json({ message: "User data successfully updated" });
+      } catch (error) {
+        if (!error.statusCode) {
+          error.statusCode = 500;
+        }
+        next(error);
+      }
     } catch (error) {
       if (!error.statusCode) {
         error.statusCode = 500;
@@ -73,13 +81,11 @@ exports.updateUserData = async (req, res, next) => {
 
 exports.getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find({}, {"username": 1, "display_picture_url": 1});
+    const users = await User.find({}, { username: 1, display_picture_url: 1 });
     if (!users) {
       return res.status(404).json({ message: "No users found" });
     } else {
-      return res
-        .status(200)
-        .json({ users: users });
+      return res.status(200).json({ users: users });
     }
   } catch (error) {
     if (!error.statusCode) {
@@ -89,16 +95,18 @@ exports.getAllUsers = async (req, res, next) => {
   }
 };
 
-exports.updateUserDetails = async (req, res, next) =>{
-  const userId = req.params.userId
-  
+exports.updateUserDetails = async (req, res, next) => {
+  const userId = req.params.userId;
+
   try {
-    const user = await User.findById(userId)
-    res.status(200).json({message:"User details successfully fetched", user: user})
+    const user = await User.findById(userId);
+    res
+      .status(200)
+      .json({ message: "User details successfully fetched", user: user });
   } catch (error) {
-    if(!error.statusCode){
-      error.statusCode = 500
+    if (!error.statusCode) {
+      error.statusCode = 500;
     }
-    next(error)
+    next(error);
   }
-}
+};
