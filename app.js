@@ -11,12 +11,12 @@ const userRoutes = require("./routes/user");
 const multer = require("multer");
 const fileStorage = require("./utils/fileStorage");
 const fileFiltering = require("./utils/fileFiltering");
-const User = require("./models/user");
-const { isContext } = require("vm");
+
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
+const PORT = process.env.PORT || 8080;
 let userId;
 dotenv.config();
 //Middleware
@@ -61,8 +61,8 @@ mongoose
   )
   .then((result) => {
     console.log("Connection to DB successful ...");
-    httpServer.listen(8080, () => {
-      console.log("Server listening on port 8080");
+    httpServer.listen(PORT, () => {
+      console.log(`server started on port ${PORT}`);
     });
     io.on("connection", (socket) => {
       //Notify all users that a new user has joined
